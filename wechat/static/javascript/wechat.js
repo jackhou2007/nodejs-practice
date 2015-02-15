@@ -2,7 +2,6 @@ angular.module('wechatApp', []);
 
 // 封裝socket
 angular.module('wechatApp').factory('socket', function ($rootScope) {
-    // var socket = io.connect('/');
     var socket = io();
     return {
         on: function (eventName, callback) {
@@ -14,7 +13,7 @@ angular.module('wechatApp').factory('socket', function ($rootScope) {
             });
         },
         emit: function (eventName, data, callback) {
-            socket.emit(eventName, function () {
+            socket.emit(eventName, data, function () {
                 var args = arguments;
                 $rootScope.$apply(function () {
                     if (callback) {
