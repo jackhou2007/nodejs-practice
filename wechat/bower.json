@@ -1,0 +1,24 @@
+{
+  "name": "wechat",
+  "version": "0.0.0",
+  "homepage": "https://github.com/jackhou2007/nodejs-practice",
+  "authors": [
+    "jackhou2007 <jackhou2007@gmail.com>"
+  ],
+  "keywords": [
+    "wechat"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "directory": "static/components",
+  "dependencies": {
+    "bootstrap": "~3.3.2",
+    "angular": "~1.3.13"
+  }
+}
