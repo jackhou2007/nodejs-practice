@@ -9,6 +9,13 @@ var multer = require('multer');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 
+// var parseSignedCookie = require('connect').utils.parseSignedCookies;
+var MongoStore = require('connect-mongo')(session);
+var Cookie = require('cookie');
+var sessionStore = new MongoStore({
+    url: 'mongodb://localhost/wechat'
+});
+
 var User = require('./controllers/user');
 
 app.use(bodyParser.json()); // for parsing application/json
@@ -22,11 +29,12 @@ app.use(session({
     secret: 'wechat',
     cookie: {
         maxAge: 600 * 1000
-    }
+    },
+    store: sessionStore
 }));
 
 app.get('/api/validate', function (req, res) {
-    _userId = req.session._userId;
+    var _userId = req.session._userId;
     if (_userId) {
         User.findUserById(_userId, function (err, user) {
             if (err) {
@@ -69,8 +77,36 @@ app.get('/', function (req, res) {
     res.sendFile(__dirname + '/static/index.html');
 });
 
+// io.set('authorization', function(data, accept) {
+//   cookieParser(data, {}, function(err) {
+//     if (err) {
+//       accept(err, false);
+//     } else {
+//       sessionStore.get(data.signedCookies['express.sid'], function(err, session) {
+//         if (err || !session) {
+//           accept('Session error', false);
+//         } else {
+//           data.session = session;
+//           accept(null, true);
+//         }
+//       });
+//     }
+//   });
+// });
+
 var messages = [];
 io.on('connection', function(socket){
+    // var _userId = socket.handshake.session._userId;
+
+    // User.online(_userId, function (err, user) {
+    //     if (err) {
+    //         socket.emit('err', {
+    //             msg: err
+    //         });
+    //     } else {
+    //         socket.broadcast.emit('online', user);
+    //     }
+    // });
     console.log('a user connected');
 
     socket.on('getAllMessages', function () {
@@ -78,8 +114,22 @@ io.on('connection', function(socket){
     });
 
     socket.on('createMessage', function (message) {
+        // console.log('message', message);
         messages.push("message");
         socket.emit('messageAdded', message);
+    });
+
+    socket.on('getRoom', function () {
+        User.getOnlineUsers(function (err, users) {
+            if (err) {
+                socket.emit('err', {msg: err});
+            } else {
+                socket.emit('rootData', {
+                    users: users,
+                    messages: messages
+                });
+            }
+        });
     });
 
     socket.on('disconnect', function(){
